@@ -4,10 +4,8 @@
    if switch is in the "unsynchronized" position.
 */
 
-#include "Servo.h"
 #include <Wire.h>
 #include "brake.h"
-#include "servoControl.h"
 #include "constants.h"
 #include "evaluation.h"
 
@@ -17,7 +15,6 @@
 **********************************************************
 *********************************************************/
 
-Servo brakeSimulator;
 byte brakeStatus;
 
 /*********************************************************
@@ -40,23 +37,22 @@ float readSwitchSense1(){
 float readSwitchSense2(){
   return analogRead(SWITCH_2_ADC) * (SUPPLY_VOLTAGE / ADC_MAX_VALUE);
 }
-int readIgnitionSense(){
-  return digitalRead(IGNITION_PIN);
-}
-int readThrottleSense(){
-  return digitalRead(THROTTLE_PIN);
-}
 
 // Supporting function for printing simple error-messages.
 void reportError(String errorType){
   Serial.println(errorType);
-  digitalWrite(ERROR_LED, HIGH);
+  //digitalWrite(ERROR_LED, HIGH);
 }
 
 // Supporting function for printing messages, if switch is not in neutral position.
 void reportSwitchPress(String pressedType){
   Serial.println(pressedType);
 }
+
+  void requestEvent() {
+  Wire.write("hello "); // respond with message of 6 bytes
+  // as expected by master
+  }
 
 /********************************************************* 
 **********************************************************
@@ -65,17 +61,14 @@ void reportSwitchPress(String pressedType){
 *********************************************************/
 
 void setup() {
-  Wire.begin();        // join i2c bus (address optional for master)
   
-  
-  brakeSimulator.attach(SERVO_PIN);           //Attach Servo to PIN 9~
-  
+  Wire.begin(8);                // join i2c bus with address #8
+  Wire.onRequest(requestEvent); // register event
+
   pinMode(LED, OUTPUT);                       // Initializing led-pin as an output.
-  pinMode(ERROR_LED, OUTPUT);                 // Initializing led-pin as an output.
-  pinMode(INFO_LED, OUTPUT);                  // Initializing led-pin as an output.
   
-  pinMode(IGNITION_PIN, INPUT);
-  pinMode(THROTTLE_PIN, INPUT);
+  pinMode(TEST_IN, INPUT);
+  pinMode(TEST_IN_2, INPUT);
   
   analogReadResolution(ADC_READ_RESOLUTION);  // Sets the size (in bits) of the value returned by analogRead(). 
   
@@ -88,9 +81,8 @@ void setup() {
   }
   else{
     // Initialization successful -> brake applied!
-    digitalWrite(ERROR_LED, LOW);
+    //digitalWrite(ERROR_LED, LOW);
   }
-  
 }
 
 /********************************************************* 
@@ -109,15 +101,10 @@ void loop() {
   float gndSense = 0;                               // gndSense - measured GND-control voltage
   float switch1 = 0;                                // switch1 - measured voltage of first switch-part
   float switch2 = 0;                                // switch2 - measured voltage of second switch-part
-  int ignitionSense = 1;                            // 1 = ignition off 
-  int throttleSense = 1;                            // 1 = no throttle
   boolean vccStatusOk = 0;                          // vccStatusOk - true, if there is no short or opening in the signal circuit
   boolean gndStatusOk = 0;                          // gndStatusOk - true, if there is no short or opening in the signal circuit
   voltInterval switchStatus1 = UNDIFINED_INTERVAL;  // switchStatus1 - Indicates, in which range the first measured switch-value was.
   voltInterval switchStatus2 = UNDIFINED_INTERVAL;  // switchStatus2 - Indicates in which range the second measured switch-value was.
-  boolean ignitionOn = false;
-  boolean throttlePressed = false;
-  int servoPos = START_POS;                         // servoPos - position of servo - [20,160]
   systemState sysState = UNDEFINED_STATE;           // sysState - code for 'switch-position' or hardware-failure-type          
   
   /********************************************************* 
@@ -128,21 +115,17 @@ void loop() {
   digitalWrite(LED, HIGH);
   delay(50);
   digitalWrite(LED, LOW);
-  //delay(1);
+  delay(50);
   
   vccSense = readVccSense();
   gndSense = readGndSense();
   switch1 = readSwitchSense1();
   switch2 = readSwitchSense2();
-  ignitionSense = readIgnitionSense();
-  throttleSense = readThrottleSense();
   
   vccStatusOk = evaluateVccSense(vccSense);
   gndStatusOk = evaluateGndSense(gndSense);
   switchStatus1 = evaluateSwitch(switch1);
   switchStatus2 = evaluateSwitch(switch2);
-  ignitionOn = evaluateIgnitionSense(ignitionSense);
-  throttlePressed = evaluateThrottleSense(throttleSense);
 
   if(!vccStatusOk){reportError("Error: VCC");}
   if(!gndStatusOk){reportError("Error: GND");}
@@ -155,18 +138,8 @@ void loop() {
   //applySystemState(sysState)      //TODO : find better name for function!
   //!!!Achtung gndOK und vccOK noch mit berücksichtigen
   switch (sysState){
-    case NOTHING_PRESSED:
-      if(throttlePressed){
-      releaseBrake();
-      }
-      break;
     case APPLY_PRESSED:
-      if(!throttlePressed){
-        applyBrake();
-      }
-      else {
-        Serial.println("Tried to apply Brake during Throttle was pressed!"); 
-      }
+      applyBrake();
       break;
     case RELEASE_PRESSED:
       releaseBrake();
@@ -190,22 +163,10 @@ void loop() {
       reportError("Open res @ H.");
       break;      
   }
-  
-  
-  
-//  Wire.requestFrom(8, 6);    // request 6 bytes from slave device #8
-//
-//  while (Wire.available()) { // slave may send less than requested
-//    char c = Wire.read(); // receive a byte as character
-//    //Serial.print(c);         // print the character
-//  }
         
   brakeStatus = getBrakeStatus();
   
-  servoPos = getServoPos(brakeStatus);
-  
-  if((servoPos >= START_POS) && (servoPos <= END_POS)){    // check value, before passing it to a library function! MISRA-Dir. 4.11
-    brakeSimulator.write(servoPos);
-  }  
-  
+  float testvalue = digitalRead(TEST_IN);
+  float testvalue2 = analogRead(TEST_IN_2);
+ 
  }

@@ -29,7 +29,7 @@ int getServoPos(byte brakeState){
     Serial.print("Error: BrakeState-Evaluation!");
   }
   
-  Serial.println(servoPos);
+  //Serial.println(servoPos);
   
   return servoPos;
 }

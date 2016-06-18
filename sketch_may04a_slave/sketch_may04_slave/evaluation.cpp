@@ -5,6 +5,8 @@ boolean evaluateVccSense(float measuredVcc){
   if(measuredVcc >= VCC_GOOD){
     vccOk = true;
   }
+  else{Serial.println(measuredVcc);
+  }
   return vccOk;
 }
 boolean evaluateVccSense(float measuredVcc) __attribute__ ((noinline));
@@ -14,32 +16,13 @@ boolean evaluateGndSense(float gndVoltage){
   if(gndVoltage <= GND_GOOD){
     gndOk = true;
   }
+  else {
+  Serial.println(gndVoltage);
+  }
   return gndOk;
 }
 // to avoid, that function is optimized during compiling
 boolean evaluateGndSense(float gndVoltage) __attribute__ ((noinline));
-
-boolean evaluateIgnitionSense(int ignitionSense){
-  boolean ignitionOn = false;
-  if(ignitionSense == 0){
-    ignitionOn = true;
-  }
-  return ignitionOn;
-}
-// to avoid, that function is optimized during compiling
-boolean evaluateIgnitionSense(int ignitionSense) __attribute__ ((noinline));
-
-boolean evaluateGndSense(float gndVoltage) __attribute__ ((noinline));
-
-boolean evaluateThrottleSense(int throttleSense){
-  boolean throttleOn = false;
-  if(throttleSense == 0){
-    throttleOn = true;
-  }
-  return throttleOn;
-}
-// to avoid, that function is optimized during compiling
-boolean evaluateThrottleSense(int throttleSense) __attribute__ ((noinline));
 
 voltInterval evaluateSwitch(float voltage){
   voltInterval returnStatus; //check, if NULL is ok as default - what happens if NULL is returned?
