@@ -33,6 +33,8 @@ boolean brakeInit() {
   /* Set up servo to "Brake-Applied" position */
   Serial.println("Brake-Initialization");
   // for showing, that led are working
+  digitalWrite(INFO_LED, HIGH);
+  digitalWrite(ERROR_LED, HIGH);
   delay(1000);
   brakeState = BRAKE_APPLIED;
   // maybe use applyBreak();

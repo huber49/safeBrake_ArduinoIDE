@@ -67,7 +67,9 @@ systemState analyseSystemState(voltInterval switchStatus1, voltInterval switchSt
   else if(switchStatus1 == FAIL_OPEN)       {sysState = OPEN_RES_G;}
   else if(switchStatus2 == FAIL_OPEN)       {sysState = OPEN_RES_H;}
   else if( ((switchStatus1 == SWITCH_LOW_VAL) && (switchStatus2 == SWITCH_NORM_VAL)) ||
-           ((switchStatus1 == SWITCH_NORM_VAL) && (switchStatus2 == SWITCH_LOW_VAL)) ){
+           ((switchStatus1 == SWITCH_NORM_VAL) && (switchStatus2 == SWITCH_LOW_VAL)) ||
+           ((switchStatus1 == SWITCH_HIGH_VAL) && (switchStatus2 == SWITCH_NORM_VAL)) ||
+           ((switchStatus1 == SWITCH_NORM_VAL) && (switchStatus2 == SWITCH_HIGH_VAL)) ){
     Serial.println("Detected unsynchronized-behaviour of the Switch Button --> Ignored!");
   }
   else{
