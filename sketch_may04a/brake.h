@@ -25,5 +25,10 @@ void releaseBrake();
 */
 boolean brakeInit();
 
+/* Stores the State of the Brake (Applied / Released)
+*  when the ignition is turned off.
+*/
+boolean storeBrakeStatus();
+
 #endif
 

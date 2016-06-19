@@ -36,7 +36,18 @@ boolean brakeInit() {
   digitalWrite(INFO_LED, HIGH);
   digitalWrite(ERROR_LED, HIGH);
   delay(1000);
-  brakeState = BRAKE_APPLIED;
-  // maybe use applyBreak();
+  digitalWrite(INFO_LED, LOW);
+  digitalWrite(ERROR_LED, LOW);
+  if(brakeState == 0){
+    applyBrake();
+  }
+  else{
+    if(brakeState == BRAKE_RELEASED){
+      //Info-LED is already low
+    }
+    else if(brakeState == BRAKE_APPLIED){
+      digitalWrite(INFO_LED, HIGH);
+    }
+  }
   return true;
 }
