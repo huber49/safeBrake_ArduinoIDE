@@ -6,8 +6,8 @@
 */
 #define LED 13
 
-#define TEST_IN 8
-#define TEST_IN_2 9
+#define IGNITION_PIN 8
+#define THROTTLE_PIN 9
 
 // id of ADC input-pin for the vcc-sense-measurement
 #define VCC_ADC A3
@@ -25,15 +25,15 @@
 // 3.3 volt is the supply-voltage of the system.
 #define SUPPLY_VOLTAGE 3.3
 // VCC always should be 3.3 Volt. In case of small measurement-errors smaller values up to 3.25 Volt are also accepted. 
-#define VCC_GOOD 3.25
+#define VCC_GOOD 3.20
 // GND always should be 0.00 Volt. In case of small measurement-errors bigger values up to 0.05 Volt are also accepted.
-#define GND_GOOD 0.05
+#define GND_GOOD 0.10
 
 /* FAIL_IGNORE is only necessary if you want to double-check the detected HW-Failure.
    See notes and version sketch_mar30a for more information.
 */
 enum voltInterval { UNDIFINED_INTERVAL, FAIL_GND_SHORT, FAIL_VCC_SHORT, FAIL_OPEN, SWITCH_NORM_VAL, SWITCH_LOW_VAL, SWITCH_HIGH_VAL, FAIL_IGNORE};
 
-enum systemState { UNDEFINED_STATE, NOTHING_PRESSED, APPLY_PRESSED, RELEASE_PRESSED, SHORT_VCC_C, SHORT_VCC_E, SHORT_GND_D, SHORT_GND_F, OPEN_RES_G, OPEN_RES_H};
+enum systemState { UNDEFINED_STATE = 7, NOTHING_PRESSED, APPLY_PRESSED, RELEASE_PRESSED, SHORT_VCC_C, SHORT_VCC_E, SHORT_GND_D, SHORT_GND_F, OPEN_RES_G, OPEN_RES_H}; // values between 7 and 16
 
 #endif
