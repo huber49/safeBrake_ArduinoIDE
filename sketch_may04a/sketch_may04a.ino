@@ -20,10 +20,11 @@
 
 Servo brakeSimulator;
 byte brakeStatus;
-int aliveCounter = 0; //TODO: start with higher value, e.g. 20
+byte aliveCounter = 20; //TODO: start with higher value, e.g. 20
 boolean ignitionOn = false;
 boolean noError = true;
 int ignitionSense = 1; //ignition off
+boolean firstRequest = true;
 
 
 /*********************************************************
@@ -73,36 +74,59 @@ void reportSwitchPress(String pressedType){
   Serial.println(pressedType);
 }
 
-boolean checkSlaveResults(systemState sysStateFromMaster){
-  systemState sysStateFromSlave = UNDEFINED_STATE;
-  byte fromSlave[2];
+boolean checkSlaveResults(systemState masterSysState){
+  boolean checkSuccessful = false;
+  boolean connectionAndSlaveOk = false;
+  boolean resultsConsistent = false;
+  systemState slaveSysState = UNDEFINED_STATE;
+  Wire.requestFrom(8, 2);      // request 6 bytes from slave device #8
   int j = 0;
-  Wire.requestFrom(8, 2);    // request 6 bytes from slave device #8
-  while (Wire.available() && j < 2) { // slave may send less than requested
-    byte c = Wire.read();
-    fromSlave[j] = c;
+  byte newAliveCounter;
+  while (Wire.available()) { // slave may send less than requested
+    byte answerPart = Wire.read();
+    if(j == 1){
+      slaveSysState = (systemState)answerPart;
+    }
+    if(j == 0){
+      newAliveCounter = answerPart;
+    }
     j++;
   }
-  sysStateFromSlave = (systemState) fromSlave[1];
-  int aliveCounterFromSlave = (int) fromSlave[0];
-  if(aliveCounterFromSlave > aliveCounter){
-    aliveCounter = aliveCounterFromSlave;
-    if(aliveCounter >= 255){
-      aliveCounter = 0;
+    if(firstRequest){
+      connectionAndSlaveOk = true;
+      aliveCounter = newAliveCounter;
+      if(aliveCounter >= 255){
+        aliveCounter = 20; //reset
+      }
+      firstRequest = false;
     }
-  }
-  else{
-//    Serial.println("AliveCounter not valid!");
-  }
-//  Serial.println("AliveCounter:     Slave:            Master: ");
-//  Serial.print(aliveCounterFromSlave);
-//  Serial.print("                  ");
-//  Serial.print(sysStateFromSlave);
-//  Serial.print("                  ");
-//  Serial.println(sysStateFromMaster);
-//  Serial.println();
+    
+    if(newAliveCounter == (aliveCounter + 1)){
+      connectionAndSlaveOk = true;
+      aliveCounter = newAliveCounter;
+      if(aliveCounter >= 255){
+        aliveCounter = 20; //reset
+      }
+    }
+    if(masterSysState == slaveSysState){
+      resultsConsistent = true;
+    }
   
-  return true; //solange das hier nicht passt wird defaultmaessig immer true zurückgegeben
+  checkSuccessful = true;//(connectionAndSlaveOk && resultsConsistent);
+  
+  Serial.println("Master:     Slave:   ");
+  Serial.print(masterSysState);
+  Serial.print("               ");
+  Serial.print(slaveSysState);
+  Serial.println();
+  Serial.print(aliveCounter);
+  Serial.print("               ");
+  Serial.print(newAliveCounter);
+  Serial.println();
+  
+  Serial.println("Successful?: ");
+  Serial.println(checkSuccessful);
+  return (true);
 }
 
 
@@ -280,6 +304,9 @@ void loop() {
       case OPEN_RES_H:
         reportError("Open res @ H.");
         noError = false;
+        break;
+      case UNSYNC_SWITCH_BEHAVE:
+        //ignore
         break;
       default:
         reportError("Unknown System State!");

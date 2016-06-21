@@ -15,6 +15,11 @@ boolean evaluateGndSense(float gndVoltage);
 // to avoid, that function is optimized during compiling
 boolean evaluateGndSense(float gndVoltage) __attribute__ ((noinline));
 
+boolean evaluateThrottleSense(int throttleSense);
+// to avoid, that function is optimized during compiling
+boolean evaluateThrottleSense(int throttleSense) __attribute__ ((noinline));
+
+
 /*
   only the return-status 1, 7 and 13 (and maybe 2) are relevant for the detection and identification of hardware-failures
   the other statuses are good to know if you want to double-check a certain hw-failure-detection, but they

@@ -44,7 +44,7 @@ boolean evaluateThrottleSense(int throttleSense) __attribute__ ((noinline));
 voltInterval evaluateSwitch(float voltage){
   voltInterval returnStatus; //check, if NULL is ok as default - what happens if NULL is returned?
   if((voltage >= 0.00) && (voltage <= 0.03)){returnStatus = FAIL_GND_SHORT;}
-  else if((voltage >= 0.29) && (voltage <= 0.42)){returnStatus = SWITCH_LOW_VAL;}
+  else if((voltage >= 0.29) && (voltage <= 0.45)){returnStatus = SWITCH_LOW_VAL;}
   else if((voltage >= 0.69) && (voltage <= 0.73)){returnStatus = FAIL_IGNORE;}
   else if((voltage >= 0.81) && (voltage <= 0.86)){returnStatus = FAIL_IGNORE;}
   else if((voltage >= 1.03) && (voltage <= 1.18)){returnStatus = SWITCH_NORM_VAL;}
@@ -87,6 +87,7 @@ systemState analyseSystemState(voltInterval switchStatus1, voltInterval switchSt
            ((switchStatus1 == SWITCH_NORM_VAL) && (switchStatus2 == SWITCH_LOW_VAL)) ||
            ((switchStatus1 == SWITCH_HIGH_VAL) && (switchStatus2 == SWITCH_NORM_VAL)) ||
            ((switchStatus1 == SWITCH_NORM_VAL) && (switchStatus2 == SWITCH_HIGH_VAL)) ){
+             sysState = UNSYNC_SWITCH_BEHAVE;
     Serial.println("Detected unsynchronized-behaviour of the Switch Button --> Ignored!");
   }
   else{
